@@ -16,7 +16,7 @@ const mount = (el: HTMLElement): void => {
 };
 
 if (process.env.NODE_ENV === "development") {
-  const devRoot = document.getElementById("_products_dev_root");
+  const devRoot = document.getElementById("_header_dev_root");
   if (devRoot) {
     mount(devRoot);
   }

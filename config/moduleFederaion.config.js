@@ -1,10 +1,14 @@
+const { remotes } = require('../../Ownfinity-Products/config/moduleFederaion.config');
 const packageJsonCommon = require('../package.json');
 
 const moduleFederationConfig = {
-    name:'products',
+    name:'header',
     filename:'remoteEntry.js',
     exposes:{
-        './ProductsApp':'./src/bootstrap.tsx'
+        './HeaderApp':'./src/bootstrap.tsx'
+    },
+    remotes:{
+        container:'container@http://localhost:2000/remoteEntry.js',
     },
     shared:packageJsonCommon.dependencies
 }
