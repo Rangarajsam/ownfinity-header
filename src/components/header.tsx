@@ -105,7 +105,7 @@ export default function Header() {
                         <ShoppingCartIcon className="size-7" />
                         <a className="inline-block ml-1"> Cart</a>
                     </div>
-                    <PopoverGroup className="hidden lg:flex lg:gap-x-12">
+                    <PopoverGroup className="lg:flex lg:gap-x-12">
                         <Popover className="relative">
                             <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900">
                                 {isClient && user?.name}
