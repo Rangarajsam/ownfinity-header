@@ -1,15 +1,19 @@
 import React from "react";
 import "./App.css";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import Providers from "./provider";
 import Header from "./components/header";
 
 const App: React.FC = () => {
+  const currentPath = window.location.pathname;
+
+  console.log("📢 Header App mounting with current path:", currentPath);
+
   return (
     <Providers>
-      <BrowserRouter>
+      <MemoryRouter initialEntries={[currentPath]}>
         <Header />
-      </BrowserRouter>
+      </MemoryRouter>
     </Providers>
   );
 };

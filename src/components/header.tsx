@@ -22,8 +22,8 @@ import {
     HeartIcon
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../store/slices/authSlice';
+import { getCartCount } from '../store/slices/cartSlice';
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../store';
 import ProductSearch from './productSearch'
@@ -32,10 +32,9 @@ import { eventBus } from 'container/eventBus';
 
 
 export default function Header() {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const navigate = useNavigate();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
-    const user = {name: "Rangaraj"}; // For testing purpose hardcoded user details
+    const user = JSON.parse(localStorage.getItem('user'));
     const [cartLength, setCartLength] = useState(0);
     const [isClient, setIsClient] = useState(false);
 
@@ -44,7 +43,8 @@ export default function Header() {
         try {
             let resultAction = await dispatch(logoutUser()).unwrap();
             if (resultAction) {
-                navigate("/login");
+                // Emit navigation event to Host instead of navigating locally
+                eventBus.emit("remote:navigate", "/login");
             }
         }
         catch (error) {
@@ -53,35 +53,49 @@ export default function Header() {
     }
 
     const goToWishlist = () => {
-        navigate("/wishlist");
+        // Emit navigation event to Host instead of navigating locally
+        eventBus.emit("remote:navigate", "/wishlist");
     }
 
     const goToCart = () => {
-        navigate("/cart");
+        // Emit navigation event to Host instead of navigating locally
+        eventBus.emit("remote:navigate", "/cart");
     }
     const goToProfile = () => {
-        navigate("/profile");
+        // Emit navigation event to Host instead of navigating locally
+        eventBus.emit("remote:navigate", "/profile");
     }
 
     const userDetails: Array<{ name: string; description?: string; icon: React.ElementType; onClick?: () => void }> = [
         { name: 'My Profile', description: 'Check the details', icon: UserCircleIcon, onClick: goToProfile },
         { name: 'My Wishlist', description: 'Check the products in wishlist', icon: HeartIcon, onClick: goToWishlist },
-        { name: 'Logout', description: 'Logout to see the new world', icon: ArrowRightEndOnRectangleIcon, onClick: handleLogout },
+        { name: 'Logout', description: 'Logout to leave our galaxy', icon: ArrowRightEndOnRectangleIcon, onClick: handleLogout },
     ]
 
     const goToProductPage = () => {
-        navigate("/product/list");
+        // Emit navigation event to Host instead of navigating locally
+        eventBus.emit("remote:navigate", "/");
     }
 
 
-    eventBus.on('cart:updated', (data:{ quantity: number; }) => {
+    eventBus.on('cart:updated', (data:{ count: number; }) => {
         console.log("Cart updated event received in header", data);
-        setCartLength(data.quantity);
+        setCartLength(data.count);
     })
+
+    const handleGetCartCount = async () => {
+        try {
+            const result = await dispatch(getCartCount()).unwrap();
+            setCartLength(result.count);
+        } catch (error) {
+            console.error("Error fetching cart count:", error);
+        }
+    };
 
     useEffect(() => {
         console.log("Header component mounted");
         setIsClient(true);
+        handleGetCartCount();
     }, []);
 
     return (
@@ -99,13 +113,13 @@ export default function Header() {
                     <div className="w-1/2">
                         <ProductSearch />
                     </div>
-                    <div className="w-1/6 flex justify-end mr-10 items-center relative cursor-pointer" onClick={goToCart}>
+                   <div className="w-1/6 flex justify-end mr-10 items-center relative cursor-pointer" onClick={goToCart}>
                         {cartLength > 0 && <div className="size-5 leading-5 absolute rounded-full -top-2 right-[48px] bg-red-500 
                     text-white inline-block align-middle text-center text-xs">{cartLength}</div>}
                         <ShoppingCartIcon className="size-7" />
                         <a className="inline-block ml-1"> Cart</a>
                     </div>
-                    <PopoverGroup className="lg:flex lg:gap-x-12">
+                    <PopoverGroup className="hidden lg:block lg:gap-x-12">
                         <Popover className="relative">
                             <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900">
                                 {isClient && user?.name}
@@ -141,7 +155,7 @@ export default function Header() {
                         </Popover>
                     </PopoverGroup>
 
-                    <div className="flex lg:hidden">
+                    <div className="lg:hidden">
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}

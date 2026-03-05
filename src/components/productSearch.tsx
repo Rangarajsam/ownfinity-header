@@ -3,6 +3,8 @@ import { useCombobox } from "downshift";
 import { listAllProducts, setSelectedProduct } from "../store/slices/productSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { eventBus } from "container/eventBus";
+
 interface Product {
     _id: string;
     description: string;
@@ -31,6 +33,16 @@ const ProductSearch = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const goToProductDescription = (productId: string) => {
+            // Emit navigation event to Host instead of navigating locally
+            eventBus.emit("remote:navigate", "/product/" + productId);
+    }
+
+    const goToSelectedProduct = (product: Product) => {
+       setSelectedProduct(product);
+       goToProductDescription(product._id);
+    }
 
     const handleGetProducts = async (query?: string) => {
         try {
@@ -100,8 +112,7 @@ const ProductSearch = () => {
                             key={product._id}
                             {...getItemProps({ product, index, 
                                 onClick:() => {
-                                        setSelectedProduct(product);
-                                        navigate(`/product/${product._id}`);
+                                        goToSelectedProduct(product);
                                     }
                                 }
                             )}
