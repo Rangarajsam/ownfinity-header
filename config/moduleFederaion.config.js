@@ -1,4 +1,3 @@
-const { remotes } = require('../../Ownfinity-Products/config/moduleFederaion.config');
 const packageJsonCommon = require('../package.json');
 
 const moduleFederationConfig = {
